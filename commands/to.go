@@ -1,9 +1,12 @@
 package commands
 
 import (
-	"github.com/pkg/errors"
+	"fmt"
+	"os"
+
 	"github.com/maiko/sshed/host"
 	"github.com/maiko/sshed/ssh"
+	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 )
 
@@ -36,6 +39,7 @@ func (cmds *Commands) toAction(c *cli.Context) (err error) {
 	if c.NArg() == 0 {
 		key, err = cmds.askServerKey()
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error connecting to host: %s\n", err)
 			return err
 		}
 	} else {

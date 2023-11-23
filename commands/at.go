@@ -3,14 +3,16 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"github.com/mgutz/ansi"
-	"github.com/pkg/errors"
-	"github.com/maiko/sshed/ssh"
-	"github.com/urfave/cli"
-	"gopkg.in/AlecAivazis/survey.v1"
 	"io/ioutil"
 	"log"
+	"os"
 	"sync"
+
+	"github.com/maiko/sshed/ssh"
+	"github.com/mgutz/ansi"
+	"github.com/pkg/errors"
+	"github.com/urfave/cli"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 func (cmds *Commands) newAtCommand() cli.Command {
@@ -33,6 +35,7 @@ func (cmds *Commands) atAction(c *cli.Context) (err error) {
 	if keys[0] == "" {
 		keys, err = cmds.askServersKeys()
 		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error connecting to host: %s\n", err)
 			return err
 		}
 	}
