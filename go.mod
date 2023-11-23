@@ -2,8 +2,6 @@ module github.com/maiko/sshed
 
 go 1.21
 
-toolchain go1.21.4
-
 require (
 	github.com/boltdb/bolt v1.3.1
 	github.com/kevinburke/ssh_config v1.2.0
