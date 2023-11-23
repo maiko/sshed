@@ -6,10 +6,13 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"errors"
-	"github.com/urfave/cli"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"time"
+
+	"github.com/urfave/cli"
 )
 
 func (cmds *Commands) newBackupCommand() cli.Command {
@@ -22,8 +25,8 @@ func (cmds *Commands) newBackupCommand() cli.Command {
 
 func (cmds *Commands) backupAction(ctx *cli.Context) error {
 	// Get the paths for SSH config and keychain from the context
-	sshConfigPath := ctx.String("ssh-config-path")
-	keychainPath := ctx.String("keychain-path")
+	sshConfigPath := ctx.String("config")
+	keychainPath := ctx.String("keychain")
 	backupDir := ctx.String("backup-dir")
 
 	// Validate that the paths are not empty
@@ -31,38 +34,32 @@ func (cmds *Commands) backupAction(ctx *cli.Context) error {
 		return errors.New("ssh-config-path, keychain-path, and backup-dir must be provided")
 	}
 
-	// Ensure the backup directory exists
-	if err := os.MkdirAll(backupDir, 0755); err != nil {
+	// Create a temporary directory for the backup
+	tempDir, err := os.MkdirTemp("", "sshed_backup_")
+	if err != nil {
 		return err
 	}
+	defer os.RemoveAll(tempDir) // clean up
 
-	// Define backup file paths
-	sshConfigBackupPath := filepath.Join(backupDir, "ssh_config_backup")
-	keychainBackupPath := filepath.Join(backupDir, "keychain_backup")
+	// Define backup file paths in the temp directory
+	sshConfigBackupPath := filepath.Join(tempDir, "ssh_config_backup")
+	keychainBackupPath := filepath.Join(tempDir, "keychain_backup")
 
 	// Backup the SSH config file
 	if err := copyFile(sshConfigPath, sshConfigBackupPath); err != nil {
-		cleanupBackupFiles(sshConfigBackupPath, keychainBackupPath)
 		return err
 	}
 
 	// Backup the keychain database
 	if err := copyFile(keychainPath, keychainBackupPath); err != nil {
-		cleanupBackupFiles(sshConfigBackupPath, keychainBackupPath)
 		return err
 	}
 
 	// Create a tgz file containing the backed up files
-	tgzPath := filepath.Join(backupDir, "sshed_backup.tgz")
-	tempTgzPath := tgzPath + ".tmp"
-	if err := createTgz(backupDir, tempTgzPath); err != nil {
-		cleanupBackupFiles(sshConfigBackupPath, keychainBackupPath, tempTgzPath)
-		return err
-	}
-
-	// Rename the temporary tgz to the final file name
-	if err := os.Rename(tempTgzPath, tgzPath); err != nil {
-		cleanupBackupFiles(sshConfigBackupPath, keychainBackupPath, tempTgzPath)
+	timestamp := time.Now().Format("2006-01-02_15-04-05")
+	tgzFilename := fmt.Sprintf("sshed_backup_%s.tgz", timestamp)
+	tgzPath := filepath.Join(backupDir, tgzFilename)
+	if err := createTgz(tempDir, tgzPath); err != nil {
 		return err
 	}
 
@@ -152,11 +149,4 @@ func copyFile(src, dst string) error {
 
 	_, err = io.Copy(destination, source)
 	return err
-}
-
-// cleanupBackupFiles removes the files created during the backup process
-func cleanupBackupFiles(files ...string) {
-	for _, file := range files {
-		os.Remove(file) // ignore error since cleanup is best effort
-	}
 }

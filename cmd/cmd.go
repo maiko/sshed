@@ -44,7 +44,7 @@ func main() {
 		cli.StringFlag{
 			Name:   "keychain",
 			EnvVar: "SSHED_KEYCHAIN",
-			Value:  filepath.Join(homeDir, ".sshed"),
+			Value:  filepath.Join(homeDir, ".sshed", "keychain"),
 			Usage:  "path to keychain database",
 		},
 		cli.StringFlag{
@@ -52,6 +52,12 @@ func main() {
 			EnvVar: "SSHED_CONFIG_FILE",
 			Value:  filepath.Join(homeDir, ".ssh", "config"),
 			Usage:  "path to SSH config file",
+		},
+		cli.StringFlag{
+			Name:   "backup-dir",
+			EnvVar: "SSHED_BACKUP_DIR",
+			Value:  filepath.Join(homeDir, ".sshed", "backup"),
+			Usage:  "path to backup directory",
 		},
 		cli.StringFlag{
 			Name:   "ssh-path",

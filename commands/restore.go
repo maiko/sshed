@@ -6,11 +6,11 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"errors"
-	"github.com/urfave/cli"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/urfave/cli"
 )
 
 func (cmds *Commands) newRestoreCommand() cli.Command {
@@ -18,21 +18,25 @@ func (cmds *Commands) newRestoreCommand() cli.Command {
 		Name:   "restore",
 		Usage:  "Restores SSH configuration and keychain from a backup",
 		Action: cmds.restoreAction,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:     "backup-file",
+				Usage:    "path to the backup file",
+				Required: true,
+			},
+		},
 	}
 }
 
 func (cmds *Commands) restoreAction(ctx *cli.Context) error {
 	// Validate that the backup file exists
 	backupFilePath := ctx.String("backup-file")
-	if backupFilePath == "" {
-		return errors.New("backup file path must be provided")
-	}
 	if _, err := os.Stat(backupFilePath); os.IsNotExist(err) {
 		return errors.New("backup file does not exist")
 	}
 
 	// Create a temporary directory for the restore process
-	tempRestoreDir, err := ioutil.TempDir("", "sshed_restore_")
+	tempRestoreDir, err := os.MkdirTemp("", "sshed_restore_")
 	if err != nil {
 		return err
 	}
@@ -44,19 +48,19 @@ func (cmds *Commands) restoreAction(ctx *cli.Context) error {
 	}
 
 	// Backup existing SSH config and keychain files before overwriting
-	sshConfigPath := ctx.String("ssh-config-path")
-	keychainPath := ctx.String("keychain-path")
+	sshConfigPath := ctx.String("config")
+	keychainPath := ctx.String("keychain")
 	if err := backupExistingFiles([]string{sshConfigPath, keychainPath}); err != nil {
 		return err
 	}
 
 	// Restore the SSH config file
-	if err := moveFile(filepath.Join(tempRestoreDir, "ssh_config"), sshConfigPath); err != nil {
+	if err := moveFile(filepath.Join(tempRestoreDir, "ssh_config_backup"), sshConfigPath); err != nil {
 		return err
 	}
 
 	// Restore the keychain database
-	if err := moveFile(filepath.Join(tempRestoreDir, "keychain.db"), keychainPath); err != nil {
+	if err := moveFile(filepath.Join(tempRestoreDir, "keychain_backup"), keychainPath); err != nil {
 		return err
 	}
 
