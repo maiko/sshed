@@ -4,10 +4,10 @@ notifications:
   email: false
 
 go:
-  - 1.9.x
+  - 1.21.x
 
 before_install:
-  - curl -L -s https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 -o $GOPATH/bin/dep
+  - curl -L -s https://github.com/golang/dep/releases/download/v0.5.4/dep-linux-amd64 -o $GOPATH/bin/dep
   - chmod +x $GOPATH/bin/dep
 
 install: "dep ensure"
@@ -28,8 +28,8 @@ deploy:
     - build/sshed-$TRAVIS_TAG-darwin-amd64.sha256
     - build/sshed-$TRAVIS_TAG-linux-amd64
     - build/sshed-$TRAVIS_TAG-linux-amd64.sha256
-    - build/sshed-$TRAVIS_TAG-windows-amd64
-    - build/sshed-$TRAVIS_TAG-windows-amd64.sha256
+    - build/sshed-$TRAVIS_TAG-windows-amd64.exe
+    - build/sshed-$TRAVIS_TAG-windows-amd64.exe.sha256
   skip_cleanup: true
   on:
     tags: true

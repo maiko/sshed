@@ -32,7 +32,7 @@ archives:
       - completions/autocomplete.sh
 
 source:
-  enabled: true
+  enabled: false
 
 release:
   prerelease: auto
@@ -42,27 +42,6 @@ checksum:
 
 changelog:
   skip: true
-
-brews:
-  - tap:
-      owner: maiko
-      name: homebrew-sshed-v2
-    commit_author:
-      name: Maiko BOSSUYT
-      email: hello@maiko-bossuyt.eu
-    homepage: https://github.com/maiko/sshed
-    install: |
-        bin.install "sshed"
-        bash_completion.install "completions/autocomplete.sh"
-      
-scoop:
-  bucket:
-    owner: maiko
-    name: scoop-sshed
-  commit_author:
-    name: Maiko BOSSUYT
-    email: hello@maiko-bossuyt.eu
-  homepage: https://github.com/maiko/sshed
 
 nfpms:
   -
