@@ -21,7 +21,7 @@ func (cmds *Commands) newRestoreCommand() cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:     "backup-file",
-				Usage:    "path to the backup file",
+				Usage:    "path to the backup file to restore",
 				Required: true,
 			},
 		},

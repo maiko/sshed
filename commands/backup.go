@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/user"
 	"path/filepath"
 	"time"
 
@@ -16,9 +17,33 @@ import (
 )
 
 func (cmds *Commands) newBackupCommand() cli.Command {
+
+	usr, _ := user.Current()
+	homeDir := usr.HomeDir
+
 	return cli.Command{
-		Name:   "backup",
-		Usage:  "Backs up SSH configuration and keychain into a .tgz file",
+		Name:  "backup",
+		Usage: "Backs up SSH configuration and keychain into a .tgz file",
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:   "keychain",
+				EnvVar: "SSHED_KEYCHAIN",
+				Value:  filepath.Join(homeDir, ".sshed", "keychain"),
+				Usage:  "path to keychain database",
+			},
+			cli.StringFlag{
+				Name:   "config",
+				EnvVar: "SSHED_CONFIG_FILE",
+				Value:  filepath.Join(homeDir, ".ssh", "config"),
+				Usage:  "path to SSH config file",
+			},
+			cli.StringFlag{
+				Name:   "backup-dir",
+				EnvVar: "SSHED_BACKUP_DIR",
+				Value:  filepath.Join(homeDir, ".sshed", "backup"),
+				Usage:  "path to backup directory",
+			},
+		},
 		Action: cmds.backupAction,
 	}
 }
@@ -31,7 +56,7 @@ func (cmds *Commands) backupAction(ctx *cli.Context) error {
 
 	// Validate that the paths are not empty
 	if sshConfigPath == "" || keychainPath == "" || backupDir == "" {
-		return errors.New("ssh-config-path, keychain-path, and backup-dir must be provided")
+		return errors.New("path for config, keychain, and backup-dir must be provided")
 	}
 
 	// Create a temporary directory for the backup

@@ -54,12 +54,6 @@ func main() {
 			Usage:  "path to SSH config file",
 		},
 		cli.StringFlag{
-			Name:   "backup-dir",
-			EnvVar: "SSHED_BACKUP_DIR",
-			Value:  filepath.Join(homeDir, ".sshed", "backup"),
-			Usage:  "path to backup directory",
-		},
-		cli.StringFlag{
 			Name:   "ssh-path",
 			EnvVar: "SSHED_SSH_BIN",
 			Value:  "ssh",
