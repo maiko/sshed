@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/mgutz/ansi"
 	"github.com/pkg/errors"
-	"github.com/trntv/sshed/ssh"
+	"github.com/maiko/sshed/ssh"
 	"github.com/urfave/cli"
 	"gopkg.in/AlecAivazis/survey.v1"
 	"io/ioutil"

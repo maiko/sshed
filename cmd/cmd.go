@@ -2,14 +2,15 @@ package main
 
 import (
 	"fmt"
-	"github.com/mgutz/ansi"
-	"github.com/trntv/sshed/commands"
-	"github.com/trntv/sshed/keychain"
-	"github.com/trntv/sshed/ssh"
-	"github.com/urfave/cli"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/maiko/sshed/commands"
+	"github.com/maiko/sshed/keychain"
+	"github.com/maiko/sshed/ssh"
+	"github.com/mgutz/ansi"
+	"github.com/urfave/cli"
 )
 
 var version, build string
@@ -20,8 +21,16 @@ func main() {
 
 	app.Name = "sshed"
 	app.Usage = "SSH config editor and hosts manager"
-	app.Author = "Eugene Terentev"
-	app.Email = "eugene@terentev.net"
+	app.Authors = []cli.Author{
+		{
+			Name:  "Eugene Terentev",
+			Email: "eugene@terentev.net",
+		},
+		{
+			Name:  "Maiko BOSSUYT",
+			Email: "hello@maiko-bossuyt.eu",
+		},
+	}
 
 	if version != "" && build != "" {
 		app.Version = fmt.Sprintf("%s (build %s)", version, build)
@@ -49,6 +58,12 @@ func main() {
 			EnvVar: "SSHED_BIN",
 			Value:  "ssh",
 			Usage:  "path to SSH binary",
+		},
+		cli.StringFlag{
+			Name:   "scp",
+			EnvVar: "SSHED_SCP_BIN",
+			Value:  "scp",
+			Usage:  "path to SCP binary",
 		},
 	}
 

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/kevinburke/ssh_config"
-	"github.com/trntv/sshed/host"
+	"github.com/maiko/sshed/host"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -135,6 +135,10 @@ func (s *sshConfig) Add(h *host.Host) error {
 
 	if h.IdentityFile != "" {
 		nodes = append(nodes, &ssh_config.KV{Key: "  IdentityFile", Value: h.IdentityFile})
+	}
+
+	if h.JumpHost != "" {
+		nodes = append(nodes, &ssh_config.KV{Key: "  ProxyJump", Value: h.JumpHost})
 	}
 
 	for key, option := range h.Options {

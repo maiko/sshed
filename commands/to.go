@@ -2,8 +2,8 @@ package commands
 
 import (
 	"github.com/pkg/errors"
-	"github.com/trntv/sshed/host"
-	"github.com/trntv/sshed/ssh"
+	"github.com/maiko/sshed/host"
+	"github.com/maiko/sshed/ssh"
 	"github.com/urfave/cli"
 )
 

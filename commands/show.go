@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/mgutz/ansi"
 	"github.com/pkg/errors"
-	"github.com/trntv/sshed/ssh"
+	"github.com/maiko/sshed/ssh"
 	"github.com/urfave/cli"
 )
 
@@ -49,6 +49,8 @@ func (cmds *Commands) showAction(c *cli.Context) (err error) {
 	if srv.IdentityFile != "" {
 		fmt.Printf(f, ansi.Color("IdentityFile", "green"), ansi.Color(srv.IdentityFile, "white"))
 	}
-
+	if srv.JumpHost != "" {
+		fmt.Printf(f, ansi.Color("JumpHost", "green"), ansi.Color(srv.JumpHost, "white"))
+	}
 	return nil
 }

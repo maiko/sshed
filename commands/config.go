@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	"github.com/trntv/sshed/ssh"
+	"github.com/maiko/sshed/ssh"
 	"github.com/urfave/cli"
 	"gopkg.in/AlecAivazis/survey.v1"
 )

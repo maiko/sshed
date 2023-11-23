@@ -45,29 +45,29 @@ changelog:
 
 brews:
   - tap:
-      owner: trntv
-      name: homebrew-sshed
+      owner: maiko
+      name: homebrew-sshed-v2
     commit_author:
-      name: Yevhen Terentiev
-      email: yevhen.terentiev@gmail.com
-    homepage: https://github.com/trntv/sshed
+      name: Maiko BOSSUYT
+      email: hello@maiko-bossuyt.eu
+    homepage: https://github.com/maiko/sshed
     install: |
         bin.install "sshed"
         bash_completion.install "completions/autocomplete.sh"
       
 scoop:
   bucket:
-    owner: trntv
+    owner: maiko
     name: scoop-sshed
   commit_author:
-    name: Yevhen Terentiev
-    email: yevhen.terentiev@gmail.com
-  homepage: https://github.com/trntv/sshed
+    name: Maiko BOSSUYT
+    email: hello@maiko-bossuyt.eu
+  homepage: https://github.com/maiko/sshed
 
 nfpms:
   -
-    homepage: https://github.com/trntv/sshed
-    maintainer: Yevhen Terentiev <yevhen.terentiev@gmail.com>
+    homepage: https://github.com/maiko/sshed
+    maintainer: Maiko BOSSUYT <hello@maiko-bossuyt.eu>
     formats:
       - deb
       - rpm

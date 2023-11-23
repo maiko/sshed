@@ -1,12 +1,13 @@
 package commands
 
 import (
-	"github.com/trntv/sshed/host"
-	"github.com/trntv/sshed/keychain"
-	"github.com/trntv/sshed/ssh"
+	"os/user"
+
+	"github.com/maiko/sshed/host"
+	"github.com/maiko/sshed/keychain"
+	"github.com/maiko/sshed/ssh"
 	"github.com/urfave/cli"
 	"gopkg.in/AlecAivazis/survey.v1"
-	"os/user"
 )
 
 type answers struct {
@@ -17,6 +18,7 @@ type answers struct {
 	Password       string
 	KeyFile        string
 	KeyFileContent string
+	JumpHost       string
 }
 
 func (cmds *Commands) newAddCommand() cli.Command {
@@ -104,6 +106,7 @@ func (cmds *Commands) addAction(c *cli.Context) error {
 	}
 
 	askForIdentityFile(answers, h)
+	askForJumphost(answers, h)
 
 	h = &host.Host{
 		Key:          answers.Key,
@@ -111,6 +114,7 @@ func (cmds *Commands) addAction(c *cli.Context) error {
 		Port:         answers.Port,
 		User:         answers.User,
 		IdentityFile: answers.KeyFile,
+		JumpHost:     answers.JumpHost,
 		Options:      make(map[string]string),
 	}
 
@@ -122,7 +126,7 @@ func (cmds *Commands) addAction(c *cli.Context) error {
 		if err != nil {
 			return err
 		}
-		if isOptions == true {
+		if isOptions {
 			option := struct {
 				Key   string
 				Value string
@@ -181,7 +185,7 @@ func askForIdentityFile(answers *answers, srv *host.Host) (err error) {
 			return err
 		}
 
-		if change == false {
+		if !change {
 			answers.KeyFile = srv.IdentityFile
 			return nil
 		}
@@ -226,6 +230,44 @@ func askForIdentityFile(answers *answers, srv *host.Host) (err error) {
 		err = survey.AskOne(&survey.Editor{
 			Message: "Private key content:",
 		}, &answers.KeyFileContent, nil)
+	}
+
+	return err
+}
+
+func askForJumphost(answers *answers, srv *host.Host) (err error) {
+	const OPTION_NONE = "None"
+	const OPTION_SELECT = "Select existing host"
+
+	var options = []string{OPTION_NONE}
+
+	if len(ssh.Config.Hosts) > 0 {
+		options = append(options, OPTION_SELECT)
+	}
+
+	var choice string
+
+	err = survey.AskOne(&survey.Select{
+		Options: options,
+		Message: "Do you want to provide a jumphost?",
+	}, &choice, survey.Required)
+	if err != nil {
+		return err
+	}
+
+	switch choice {
+	case OPTION_NONE:
+		answers.JumpHost = ""
+	case OPTION_SELECT:
+		var jumphostKey string
+		err = survey.AskOne(&survey.Select{
+			Options: ssh.Config.Hosts,
+			Message: "Choose jumphost:",
+		}, &jumphostKey, survey.Required)
+		if err != nil {
+			return err
+		}
+		answers.JumpHost = jumphostKey
 	}
 
 	return err

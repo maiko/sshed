@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"github.com/trntv/sshed/ssh"
+	"github.com/maiko/sshed/ssh"
 	"github.com/urfave/cli"
 )
 

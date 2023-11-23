@@ -22,21 +22,21 @@ sshed uses native ``ssh_config`` format to store connections information and sup
 # Installation
 install with brew
 ```
-brew install trntv/sshed/sshed
+brew install maiko/sshed/sshed
 ```
 install with scoop
 ```
-scoop bucket add taskctl https://github.com/trntv/scoop-sshed.git
+scoop bucket add taskctl https://github.com/maiko/scoop-sshed.git
 scoop install sshed
 ```
-download binary [here](https://github.com/trntv/sshed/releases)
+download binary [here](https://github.com/maiko/sshed/releases)
 or run in console
 ```
-curl -sf https://gobinaries.com/trntv/sshed | sh
+curl -sf https://gobinaries.com/maiko/sshed | sh
 ```
 or install with ``go get``
 ```
-go get -u github.com/trntv/sshed
+go get -u github.com/maiko/sshed
 ```
 
 # Features
@@ -101,16 +101,6 @@ PROG=sshed source $(brew --prefix sshed)/autocomplete.sh
 2. To see all available ssh options run ``man ssh_config``
 
 # TODO
- - [x] ``sshed at`` - executes command on server
- - [x] batch commands
- - [x] ssh_config integration
- - [ ] ssh options (-c, -E, -f, -T, -t)
+ - [ ] handling of ssh options (-c, -E, -f, -T, -t)
  - [ ] key, password generation
- - [x] bind address
  - [ ] replace sshpass with native go implementation
- - [ ] scp
- - [x] ssh bin flag
- - [x] autocompletion
- - [ ] backup
- - [ ] restore
- - [ ] jump hosts

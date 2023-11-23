@@ -2,12 +2,6 @@ package commands
 
 import (
 	"fmt"
-	"github.com/mgutz/ansi"
-	"github.com/trntv/sshed/host"
-	"github.com/trntv/sshed/keychain"
-	"github.com/trntv/sshed/ssh"
-	"github.com/urfave/cli"
-	"gopkg.in/AlecAivazis/survey.v1"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -15,6 +9,13 @@ import (
 	"runtime"
 	"sort"
 	"strings"
+
+	"github.com/maiko/sshed/host"
+	"github.com/maiko/sshed/keychain"
+	"github.com/maiko/sshed/ssh"
+	"github.com/mgutz/ansi"
+	"github.com/urfave/cli"
+	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type Commands struct {
@@ -47,7 +48,7 @@ func RegisterCommands(app *cli.App) {
 				Default: false,
 			}, &encrypt, nil)
 
-			if encrypt == true {
+			if encrypt {
 				key := commands.askPassword()
 				err = keychain.EncryptDatabase(key)
 				if err != nil {
@@ -58,7 +59,7 @@ func RegisterCommands(app *cli.App) {
 			return nil
 		}
 
-		if keychain.Encrypted == true {
+		if keychain.Encrypted {
 			key := commands.askPassword()
 			keychain.Password = key
 		}
@@ -73,8 +74,11 @@ func RegisterCommands(app *cli.App) {
 		commands.newRemoveCommand(),
 		commands.newToCommand(),
 		commands.newAtCommand(),
+		commands.newTransferCommand(),
 		commands.newEncryptCommand(),
 		commands.newConfigCommand(),
+		commands.newBackupCommand(),
+		commands.newRestoreCommand(),
 	}
 }
 
@@ -192,7 +196,11 @@ func (cmds *Commands) createCommand(c *cli.Context, srv *host.Host, options *opt
 		args = append(args, fmt.Sprintf("-i %s", srv.IdentityFile))
 	}
 
-	if options.verbose == true {
+	if srv.JumpHost != "" {
+		args = append(args, fmt.Sprintf("-J %s", srv.JumpHost))
+	}
+
+	if options.verbose {
 		args = append(args, "-v")
 	}
 
@@ -200,7 +208,7 @@ func (cmds *Commands) createCommand(c *cli.Context, srv *host.Host, options *opt
 		args = append(args, command)
 	}
 
-	if options.verbose == true {
+	if options.verbose {
 		fmt.Printf("%s: %s\r\n", ansi.Color("Executing", "green"), strings.Join(args, " "))
 	}
 

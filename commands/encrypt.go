@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 	"github.com/mgutz/ansi"
-	"github.com/trntv/sshed/keychain"
+	"github.com/maiko/sshed/keychain"
 	"github.com/urfave/cli"
 )
 

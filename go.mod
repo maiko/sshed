@@ -1,4 +1,4 @@
-module github.com/trntv/sshed
+module github.com/maiko/sshed
 
 go 1.14
 
