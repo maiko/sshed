@@ -1,8 +1,5 @@
-# Stand with Ukraine!
-SSHed - ssh connections manager and config editor
----
-Visual cross-platform editor created to manage list of SSH hosts in ssh config file and execute commands on those hosts.
-sshed uses native ``ssh_config`` format to store connections information and supports all available ssh options.
+# SSHed - ssh connections manager and config editor
+A visual cross-platform editor to manage list of SSH hosts in ssh config file and execute commands on those hosts. SSHed uses native ``ssh_config`` format to store connections information and supports all available ssh options.
 
 # Acknowledgments
 
