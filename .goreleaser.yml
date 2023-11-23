@@ -18,8 +18,6 @@ builds:
   ignore:
     - goos: darwin
       goarch: 386
-  gcflags:
-    - all=-trimpath={{.Env.GOPATH}}
 
 archives:
   - format: tar.gz
