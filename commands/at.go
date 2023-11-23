@@ -3,7 +3,7 @@ package commands
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"sync"
@@ -18,9 +18,15 @@ import (
 func (cmds *Commands) newAtCommand() cli.Command {
 	return cli.Command{
 		Name:      "at",
-		Usage:     "Executes commands",
+		Usage:     "Executes command on host(s)",
 		ArgsUsage: "[key] [command]",
 		Action:    cmds.atAction,
+		Flags: []cli.Flag{
+			cli.BoolFlag{
+				Name:  "verbose, v",
+				Usage: "verbose ssh output",
+			},
+		},
 		BashComplete: func(c *cli.Context) {
 			// This will complete if no args are passed
 			if c.NArg() > 0 {
@@ -66,7 +72,7 @@ func (cmds *Commands) atAction(c *cli.Context) (err error) {
 		go (func() {
 			defer wg.Done()
 
-			cmd, err := cmds.createCommand(c, srv, &options{}, command)
+			cmd, err := cmds.createCommand(c, srv, &options{verbose: c.Bool("verbose")}, command)
 			if err != nil {
 				log.Panicln(err)
 			}
@@ -80,7 +86,7 @@ func (cmds *Commands) atAction(c *cli.Context) (err error) {
 				log.Panicln(err)
 			}
 
-			sr, err := ioutil.ReadAll(w)
+			sr, err := io.ReadAll(w)
 			if err != nil {
 				log.Panicln(err)
 			}

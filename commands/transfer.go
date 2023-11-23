@@ -53,7 +53,7 @@ func (cmds *Commands) transferAction(c *cli.Context) error {
 
 func (cmds *Commands) transferFile(c *cli.Context, key, sourcePath, destinationPath string, upload bool) error {
 	srv := ssh.Config.Get(key)
-	scpBin := cmds.scpBin
+	scp := cmds.scp
 
 	if srv == nil {
 		return errors.New("host not found")
@@ -97,11 +97,11 @@ func (cmds *Commands) transferFile(c *cli.Context, key, sourcePath, destinationP
 	if upload {
 		fmt.Printf("Uploading %s to %s in %s\n", sourcePath, srv.Hostname, destinationPath)
 		scpCommand = fmt.Sprintf("%s%s%s %s %s@%s:%s",
-			sshpass, scpBin, options, quotePath(sourcePath), srv.User, srv.Hostname, quotePath(destinationPath))
+			sshpass, scp, options, quotePath(sourcePath), srv.User, srv.Hostname, quotePath(destinationPath))
 	} else {
 		fmt.Printf("Downloading %s from %s to %s\n", sourcePath, srv.Hostname, destinationPath)
 		scpCommand = fmt.Sprintf("%s%s%s %s@%s:%s %s",
-			sshpass, scpBin, options, srv.User, srv.Hostname, quotePath(sourcePath), quotePath(destinationPath))
+			sshpass, scp, options, srv.User, srv.Hostname, quotePath(sourcePath), quotePath(destinationPath))
 	}
 
 	var cmd *exec.Cmd

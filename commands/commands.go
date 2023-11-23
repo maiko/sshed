@@ -14,13 +14,14 @@ import (
 	"github.com/maiko/sshed/keychain"
 	"github.com/maiko/sshed/ssh"
 	"github.com/mgutz/ansi"
+	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 	"gopkg.in/AlecAivazis/survey.v1"
 )
 
 type Commands struct {
-	sshBin string
-	scpBin string
+	ssh string
+	scp string
 }
 
 type options struct {
@@ -38,8 +39,8 @@ func RegisterCommands(app *cli.App) {
 			return err
 		}
 
-		commands.sshBin = context.String("sshBin")
-		commands.scpBin = context.String("scpBin")
+		commands.ssh = context.String("ssh-path")
+		commands.scp = context.String("scp-path")
 
 		if keychain.Bootstrapped == false {
 			fmt.Println("Creating keychain...")
@@ -141,6 +142,9 @@ func (cmds *Commands) askServersKeys() ([]string, error) {
 
 func (cmds *Commands) createCommand(c *cli.Context, srv *host.Host, options *options, command string) (cmd *exec.Cmd, err error) {
 	var username string
+	var sshCommand string
+	sshpass := ""
+
 	if srv.User == "" {
 		u, err := user.Current()
 		if err != nil {
@@ -152,14 +156,7 @@ func (cmds *Commands) createCommand(c *cli.Context, srv *host.Host, options *opt
 	}
 
 	var args = make([]string, 0)
-	if srv.Password() != "" {
-		args = []string{
-			"sshpass",
-			fmt.Sprintf("-p %s", srv.Password()),
-		}
-	}
-
-	args = append(args, cmds.sshBin)
+	args = append(args, cmds.ssh)
 	args = append(args, fmt.Sprintf("-F %s", ssh.Config.Path))
 
 	if pk := srv.PrivateKey(); pk != "" {
@@ -198,26 +195,49 @@ func (cmds *Commands) createCommand(c *cli.Context, srv *host.Host, options *opt
 		args = append(args, fmt.Sprintf("-i %s", srv.IdentityFile))
 	}
 
+	// Handle JumpHost with the possibility of a password
 	if srv.JumpHost != "" {
-		args = append(args, fmt.Sprintf("-J %s", srv.JumpHost))
+		jumpHostConfig := ssh.Config.Get(srv.JumpHost)
+		if jumpHostConfig == nil {
+			return nil, errors.New("jumphost not found")
+		}
+		if jumpHostConfig.Password() != "" {
+			// Use sshpass for the JumpHost password
+			args = append(args, "-o", fmt.Sprintf("ProxyCommand=\"sshpass -p %s ssh -W %%h:%%p -p %s %s@%s\"",
+				jumpHostConfig.Password(), jumpHostConfig.Port, jumpHostConfig.User, jumpHostConfig.Hostname))
+		} else {
+			// No password for JumpHost, use standard ProxyJump
+			args = append(args, "-J", srv.JumpHost)
+		}
 	}
 
 	if options.verbose {
 		args = append(args, "-v")
 	}
 
+	// Construct the SSH command with sshpass if a password is provided for the destination host
+	if srv.Password() != "" {
+		sshpass = fmt.Sprintf("sshpass -p %s ", srv.Password())
+	}
+
 	if command != "" {
 		args = append(args, command)
 	}
 
+	// Combine all arguments for the final command
+	sshCommand = strings.Join(args, " ")
+	if sshpass != "" {
+		sshCommand = sshpass + sshCommand
+	}
+
 	if options.verbose {
-		fmt.Printf("%s: %s\r\n", ansi.Color("Executing", "green"), strings.Join(args, " "))
+		fmt.Printf("%s: %s\r\n", ansi.Color("Executing", "green"), sshCommand)
 	}
 
 	if runtime.GOOS == "windows" {
-		cmd = exec.Command("cmd", "/C", strings.Join(args, " "))
+		cmd = exec.Command("cmd", "/C", sshCommand)
 	} else {
-		cmd = exec.Command("sh", "-c", strings.Join(args, " "))
+		cmd = exec.Command("sh", "-c", sshCommand)
 	}
 
 	cmd.Stderr = os.Stderr
