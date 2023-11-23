@@ -54,13 +54,13 @@ func main() {
 			Usage:  "path to SSH config file",
 		},
 		cli.StringFlag{
-			Name:   "bin",
-			EnvVar: "SSHED_BIN",
+			Name:   "ssh-path",
+			EnvVar: "SSHED_SSH_BIN",
 			Value:  "ssh",
 			Usage:  "path to SSH binary",
 		},
 		cli.StringFlag{
-			Name:   "scp",
+			Name:   "scp-path",
 			EnvVar: "SSHED_SCP_BIN",
 			Value:  "scp",
 			Usage:  "path to SCP binary",

@@ -19,7 +19,8 @@ import (
 )
 
 type Commands struct {
-	bin string
+	sshBin string
+	scpBin string
 }
 
 type options struct {
@@ -37,7 +38,8 @@ func RegisterCommands(app *cli.App) {
 			return err
 		}
 
-		commands.bin = context.String("bin")
+		commands.sshBin = context.String("sshBin")
+		commands.scpBin = context.String("scpBin")
 
 		if keychain.Bootstrapped == false {
 			fmt.Println("Creating keychain...")
@@ -157,7 +159,7 @@ func (cmds *Commands) createCommand(c *cli.Context, srv *host.Host, options *opt
 		}
 	}
 
-	args = append(args, cmds.bin)
+	args = append(args, cmds.sshBin)
 	args = append(args, fmt.Sprintf("-F %s", ssh.Config.Path))
 
 	if pk := srv.PrivateKey(); pk != "" {

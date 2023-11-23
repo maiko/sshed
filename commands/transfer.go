@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/maiko/sshed/ssh"
@@ -52,39 +53,74 @@ func (cmds *Commands) transferAction(c *cli.Context) error {
 
 func (cmds *Commands) transferFile(c *cli.Context, key, sourcePath, destinationPath string, upload bool) error {
 	srv := ssh.Config.Get(key)
-	scpBin := c.String("scp")
+	scpBin := cmds.scpBin
+
 	if srv == nil {
 		return errors.New("host not found")
 	}
 
 	var scpCommand string
 	options := ""
+	sshpass := ""
+
 	if srv.IdentityFile != "" {
 		options += " -i " + quotePath(srv.IdentityFile)
 	}
 	if srv.Port != "" {
 		options += " -P " + srv.Port
 	}
+
+	// Handle JumpHost with the possibility of a password
 	if srv.JumpHost != "" {
-		options += " -o ProxyJump=" + srv.JumpHost
+		jumpHostConfig := ssh.Config.Get(srv.JumpHost)
+		if jumpHostConfig == nil {
+			return errors.New("jumphost not found")
+		}
+		if jumpHostConfig.Password() != "" {
+			// Use sshpass for the JumpHost password
+			options += " -o ProxyCommand=\"sshpass -p " + jumpHostConfig.Password() + " ssh -W %h:%p -p " + jumpHostConfig.Port + " " + jumpHostConfig.User + "@" + jumpHostConfig.Hostname + "\""
+		} else {
+			// No password for JumpHost, use standard ProxyJump
+			options += " -o ProxyJump=" + srv.JumpHost
+		}
 	}
 
 	if upload && !fileExists(sourcePath) {
 		return errors.New("source file does not exist")
 	}
 
-	if upload {
-		scpCommand = fmt.Sprintf("%s %s %s %s@%s:%s",
-			scpBin, options, quotePath(sourcePath), srv.User, srv.Hostname, quotePath(destinationPath))
-	} else {
-		scpCommand = fmt.Sprintf("%s %s %s@%s:%s %s",
-			scpBin, options, srv.User, srv.Hostname, quotePath(sourcePath), quotePath(destinationPath))
+	// Construct the scp command with sshpass if a password is provided for the destination host
+	if srv.Password() != "" {
+		sshpass = fmt.Sprintf("sshpass -p %s ", srv.Password())
 	}
 
-	cmd := exec.Command("sh", "-c", scpCommand)
+	if upload {
+		fmt.Printf("Uploading %s to %s in %s\n", sourcePath, srv.Hostname, destinationPath)
+		scpCommand = fmt.Sprintf("%s%s%s %s %s@%s:%s",
+			sshpass, scpBin, options, quotePath(sourcePath), srv.User, srv.Hostname, quotePath(destinationPath))
+	} else {
+		fmt.Printf("Downloading %s from %s to %s\n", sourcePath, srv.Hostname, destinationPath)
+		scpCommand = fmt.Sprintf("%s%s%s %s@%s:%s %s",
+			sshpass, scpBin, options, srv.User, srv.Hostname, quotePath(sourcePath), quotePath(destinationPath))
+	}
+
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		cmd = exec.Command("cmd", "/C", scpCommand)
+	} else {
+		cmd = exec.Command("sh", "-c", scpCommand)
+	}
+
 	cmd.Stderr = os.Stderr
 	cmd.Stdout = os.Stdout
-	return cmd.Run()
+
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Done!")
+	return nil
 }
 
 func quotePath(path string) string {

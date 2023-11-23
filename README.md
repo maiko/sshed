@@ -1,39 +1,27 @@
 # Stand with Ukraine!
-
----
-<p align="center">
-   <img align="center" src="https://github.blog/wp-content/uploads/2022/03/1200x630-GitHub-1.png?resize=320%2C240">
-</p>
-While Russia is destroying my home and my country, killing my friends and neighbors - any russian company, organization, or citizen, who do nothing about it,
-is prohibited from using this package.
-For others - please, pray for us, share information about war crimes Russia is conducting in Ukraine, do everything you can
-to urge your governments to be on the right side of history.
-Ukraine will prevail! Good triumph over evil! Русский военный корабль, иди нах#й!
-
----
-
 SSHed - ssh connections manager and config editor
 ---
 Visual cross-platform editor created to manage list of SSH hosts in ssh config file and execute commands on those hosts.
 sshed uses native ``ssh_config`` format to store connections information and supports all available ssh options.
 
-[![asciicast](https://asciinema.org/a/164783.svg)](https://asciinema.org/a/164783)
+# Acknowledgments
+
+Special thanks to Eugene Terentev @trntv ([eugene@terentev.net](mailto:eugene@terentev.net)) for creating the original project that this work is based upon. His contributions and vision laid the foundation for the ongoing development of this tool.
+
+# Disclaimer
+
+This project is a personal learning initiative, my first experience with Go and I'm no profesionnal developper. As such, the code may not follow all best practices. While I've prioritized security and reliability, I cannot assure the tool is free from vulnerabilities. Users should take appropriate measures to secure their systems when using SSHed, such as backing up configurations and using encrypted keychains for sensitive data. I accept no liability for any damages resulting from the use of this software.
+
+---
 
 # Installation
-install with brew
-```
-brew install maiko/sshed/sshed
-```
-install with scoop
-```
-scoop bucket add taskctl https://github.com/maiko/scoop-sshed.git
-scoop install sshed
-```
 download binary [here](https://github.com/maiko/sshed/releases)
+
 or run in console
 ```
 curl -sf https://gobinaries.com/maiko/sshed | sh
 ```
+
 or install with ``go get``
 ```
 go get -u github.com/maiko/sshed
@@ -43,7 +31,9 @@ go get -u github.com/maiko/sshed
 - add, show, list, remove ssh hosts in ssh_config file
 - show, edit ssh config via preferred text editor
 - connect to host by key
+- transfer files between your computer and host using key
 - execute commands via ssh (on single or multiple hosts)
+- use a Jumphost (also known as Bastion or ProxyHost)
 - encrypted keychain to store ssh passwords and private keys
 
 # Usage
@@ -54,29 +44,30 @@ NAME:
 USAGE:
    help [global options] command [command options] [arguments...]
 
-VERSION:
-   X.X.X
-
-AUTHOR:
+AUTHORS:
    Eugene Terentev <eugene@terentev.net>
+   Maiko BOSSUYT <hello@maiko-bossuyt.eu>
 
 COMMANDS:
-     show     Shows host
-     list     Lists all hosts
-     add      Add or edit host
-     remove   Removes host
-     to       Connects to host
-     at       Executes commands
-     encrypt  Encrypts keychain
-     config   Shows SSH config
-     help, h  Shows a list of commands or help for one command
+   show      Shows host
+   list      Lists all hosts
+   add       Add or edit host
+   remove    Removes host
+   to        Connects to host
+   at        Executes commands
+   transfer  Transfers files to/from a host
+   encrypt   Encrypts keychain
+   config    Shows SSH config
+   backup    Backs up SSH configuration and keychain into a .tgz file
+   restore   Restores SSH configuration and keychain from a backup
+   help, h   Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --keychain value  path to keychain database (default: "/Users/e.terentev/.sshed") [$SSHED_KEYCHAIN]
-   --config value    path to SSH config file (default: "/Users/e.terentev/.ssh/config") [$SSHED_CONFIG_FILE]
-   --bin value       path to SSH binary (default: "ssh") [$SSHED_BIN]
+   --keychain value  path to keychain database (default: "/home/user/.sshed") [$SSHED_KEYCHAIN]
+   --config value    path to SSH config file (default: "/home/user/.ssh/config") [$SSHED_CONFIG_FILE]
+   --ssh-path value  path to SSH binary (default: "ssh") [$SSHED_SSH_BIN]
+   --scp-path value  path to SCP binary (default: "scp") [$SSHED_SCP_BIN]
    --help, -h        show help
-   --version, -v     print the version
 ```
 
 # Bash (ZSH) autocomplete
@@ -90,9 +81,10 @@ PROG=sshed source $(brew --prefix sshed)/autocomplete.sh
 ```
 
 # Tips
-1. to store passwords you need to install sshpass that allows to offer a password via SSH
+1. To use passwords stored in your keychain, you must install `sshpass`, which allows for the automatic input of a password to SSH.
+    However, this method is **strongly discouraged** because it involves passing the password in plain text, which can be exposed to other system users via simple process monitoring tools like `ps`. For better security, it is recommended to use SSH keys for authentication, as they provide a more secure method of connection without exposing sensitive information.
 
-    to install it with brew use
+    to install `sshpass` with brew use
     ```
     brew install http://git.io/sshpass.rb
     ```
@@ -101,6 +93,8 @@ PROG=sshed source $(brew --prefix sshed)/autocomplete.sh
 2. To see all available ssh options run ``man ssh_config``
 
 # TODO
+ - [ ] replace sshpass with native go implementation
+ - [ ] manage port forwarding
+ - [ ] replace scp with something else
  - [ ] handling of ssh options (-c, -E, -f, -T, -t)
  - [ ] key, password generation
- - [ ] replace sshpass with native go implementation
